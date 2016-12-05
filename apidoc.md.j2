@@ -1,0 +1,88 @@
+{% macro render_field(field, show_required=True) %}
+  {% if show_required %}
+- {{ field.field.split('.')[-1] }}{% if not field.optional %}*{% endif %}{% if field.type %} *({{ field.type }})*{% endif %}: {{ field.description }}
+  {% else %}
+- {{ field.field.split('.')[-1] }}{% if field.type %} *({{ field.type }})*{% endif %}: {{ field.description }}
+  {% endif %}
+{% endmacro %}
+
+{% macro render_fields(fields, show_required=True) %}
+  {% for field in fields | sort(attribute="field") %}
+    {% set level = field.field.count('.') %}
+{{ render_field(field, show_required) | indent(level*4, True) }}
+  {% endfor %}
+{% endmacro %}
+
+# {{ apidoc_metadata.title }}
+
+{{ apidoc_metadata.description }}
+
+Version: {{ apidoc_metadata.version }}
+
+{% for endpoint in apidoc_data | sort(attribute="url") %}
+## `{{ endpoint.type | upper }} {{ endpoint.url }}`{% if endpoint.title %} ({{ endpoint.title }}){% endif %}
+
+  {% if endpoint.description %}
+{{ endpoint.description }}
+  {% endif %}
+
+  {% if endpoint.examples %}
+Usage:
+    {% for example in endpoint.examples %}
+~~~
+{{ example.content }}
+~~~
+    {% endfor %}
+  {% endif %}
+
+  {% if endpoint.parameter %}
+### Parameters
+    {% if endpoint.parameter.fields %}
+      {% for group, fields in endpoint.parameter.fields | dictsort %}
+{{ group }}:
+{{ render_fields(fields) }}
+      {% endfor %}
+    {% endif %}
+Examples:
+    {% for example in endpoint.parameter.examples %}
+~~~
+{{ example.content }}
+~~~
+    {% endfor %}
+  {% endif %}
+
+  {% if endpoint.success %}
+### Responses
+    {% if endpoint.success.fields %}
+      {% for group, fields in endpoint.success.fields | dictsort %}
+{{ group }}:
+{{ render_fields(fields) }}
+      {% endfor %}
+    {% endif %}
+    {% if endpoint.success.examples %}
+Examples:
+      {% for example in endpoint.success.examples %}
+~~~
+{{ example.content }}
+~~~
+      {% endfor %}
+    {% endif %}
+  {% endif %}
+  {% if endpoint.error %}
+### Errors
+    {% if endpoint.error.fields %}
+      {% for group, fields in endpoint.error.fields | dictsort %}
+{{ group }}:
+{{ render_fields(fields, show_required=False) }}
+      {% endfor %}
+    {% endif %}
+    {% if endpoint.error.examples %}
+Examples:
+      {% for example in endpoint.error.examples %}
+~~~
+{{ example.content }}
+~~~
+      {% endfor %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
