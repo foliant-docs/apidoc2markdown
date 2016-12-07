@@ -8,6 +8,17 @@ Imperfect as it is, it's de facto a standard for many API developers.
 This extension lets you render your swagger.json file as a Markdown document.
 You can customize the output by providing your own Jinja2_ template.
 
+.. important::
+
+    For best results, disable Markdown processing when building Apidoc files:
+
+    .. code-block:: shell
+
+        $ apidoc -o docs -i myproject --markdown false # <- Do this.
+        $ apidoc -o docs -i myproject                  # <- Instead of this.
+
+    This way your markup will be preserved in the final Markdown output.
+
 .. _Apidoc: http://apidocjs.com/
 .. _Jinja2: http://jinja.pocoo.org/
 
